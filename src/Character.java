@@ -3,11 +3,12 @@ import java.io.*;
 import javafx.event.*;
 import javafx.util.Duration;
 import javafx.animation.*;
+import java.util.*;
 
 public class Character{
 
   public int x, y; // in term of array
-  public int speed= 500; // in ms
+  public int speed= 300; // in ms
   public ImageView current;
   public Direction dir;
   public Timeline moving;
@@ -20,7 +21,7 @@ public class Character{
     this.view=view;
     this.x=x;
     this.y=y;
-    this.dir = Direction.Down;
+    this.dir = Direction.Right;
     if( c == Charac.hero )
       this.current = cat;
     else if ( c == Charac.badguy )
@@ -64,6 +65,13 @@ public class Character{
     }
     current.setTranslateX(x*view.SIZE_RECTANGLE);
     current.setTranslateY(y*view.SIZE_RECTANGLE - view.SIZE_RECTANGLE/2 );
+
+    for(Character food : view.foodList){
+      if(food.x==x && food.y==y){
+        //view.foodList.remove(food);
+        view.pane.getChildren().remove(food.current);
+      }
+    }
   }
 
   public void moveTo(int toX, int toY){

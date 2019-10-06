@@ -12,6 +12,7 @@ import javafx.animation.*;
 import javafx.scene.image.*;
 import java.io.*;
 import java.lang.*;
+import java.util.*;
 
 
 
@@ -35,8 +36,8 @@ public class View extends Application {
 				{1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1},
 				{1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
 				{1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1},
-				{1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
-				{1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
+				{1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
+				{1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1},
 				{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 			  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 				};
@@ -45,17 +46,27 @@ public class View extends Application {
 		public int SIZE_RECTANGLE = 50;
 		public Node[][] graph = new Node [BOARD_WIDTH][BOARD_HEIGHT];
 		public Image map = new Image(new File("../sprites/map.png").toURI().toString());
-
+  	protected Image aie = new Image(new File("../sprites/aie.png").toURI().toString());
+		public ArrayList<Character> foodList = new ArrayList<Character>();
+		public GridPane pane = new GridPane();
+		private static String arg = "";
+		private static boolean SHOW_PATH=false;
 
     public static void main(String[] args) {
+				arg = args[0];
+				try{
+					if( args[1] != null)
+						SHOW_PATH = true;
+				}
+				catch(Exception e){}
+
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("A*");
+        primaryStage.setTitle("TP1");
 
-				GridPane pane = new GridPane();
 
 				board = new Rectangle[BOARD_WIDTH][BOARD_HEIGHT];
 				for (int i = 0; i < BOARD_WIDTH; i++){
@@ -74,10 +85,11 @@ public class View extends Application {
 						food.current.setTranslateX(food.x*SIZE_RECTANGLE);
 						food.current.setTranslateY(food.y*SIZE_RECTANGLE - SIZE_RECTANGLE/2 );
 						pane.add(food.current, 0, 0);
+						foodList.add(food);
 					}
 				}
 
-				hero = new Character(8, 3, Charac.hero, this);
+				hero = new Character(8, 2, Charac.hero, this);
 				pane.add(hero.current, 0, 0);
 				hero.startMoving();
 				hero.current.setTranslateX(hero.x*SIZE_RECTANGLE);
@@ -124,12 +136,12 @@ public class View extends Application {
 
         primaryStage.setScene(scene);
         primaryStage.show();
-				astar();
+				enemyMove();
     }
 
 
-		public void astar(){
-	    KeyFrame kf= new KeyFrame(Duration.millis(800), new EventHandler<ActionEvent>(){
+		public void enemyMove(){
+	    KeyFrame kf= new KeyFrame(Duration.millis(500), new EventHandler<ActionEvent>(){
 	      @Override
 	      public void handle(ActionEvent t) {
 
@@ -163,20 +175,27 @@ public class View extends Application {
 
 					clearGraph();
 
-					Astar.calculateShortestPath(graph, start, goal, board);
+					if(arg.equals("dijkstra"))
+						Dijkstra.calculateShortestPath(start);
+					else if(arg.equals("astar"))
+						Astar.calculateShortestPath(start, goal, board);
+					else
+						System.out.println("Bad argument : Argument should be astar or dijkstra\n" + arg);
+
 					try{
 						Node next = goal.path.get(1);
 						badguy.moveTo(next.y, next.x);
 					}catch(Exception exception){
-						System.out.println("Aïe !");
+						ImageView aie2= new ImageView(aie);
+						pane.add(aie2,0,0);
+						aie2.setTranslateX(hero.x*SIZE_RECTANGLE);
+						aie2.setTranslateY(hero.y*SIZE_RECTANGLE - SIZE_RECTANGLE/2 );
+						hero.current.toFront();
+						badguy.current.toFront();
 					}
 
-
-
-
-
-
-					//goal.printPath(board);
+					if(SHOW_PATH)
+						goal.printPath(board, start);
 	      }
 	    });
 	    Timeline timeline =new Timeline(kf);

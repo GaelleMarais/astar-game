@@ -50,10 +50,10 @@ public class Node{
         return(Math.abs(this.x-node.x) + Math.abs(this.y-node.y));
     }
 
-    public void printPath(Rectangle[][] board){
+    public void printPath(Rectangle[][] board, Node start){
         for(Node node : path){
-            // System.out.print(node.toString());
-            board[node.y][node.x-1].setOpacity(0.3);
+          if(node != start)
+              board[node.y][node.x-1].setOpacity(0.3);
         }
         // System.out.println(this.toString());
     }
