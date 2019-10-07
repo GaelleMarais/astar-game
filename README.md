@@ -14,5 +14,5 @@ java View astar
 ```
 ou, pour voir le chemin calculé par l'algorithme :
 ```
-java View astar show path
+java View astar showpath
 ```
